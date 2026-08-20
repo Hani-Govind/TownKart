@@ -1,18 +1,30 @@
 import json
 import os
+
 from dotenv import load_dotenv
 from google import genai
+from google.genai import types
 
 load_dotenv()
 
-client = genai.Client(
-    api_key=os.getenv("GEMINI_API_KEY")
-)
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+
+if not GEMINI_API_KEY:
+    raise RuntimeError(
+        "GEMINI_API_KEY is not set. "
+        "Add it to your backend/.env file."
+    )
+
+client = genai.Client(api_key=GEMINI_API_KEY)
+
+MODEL_NAME = "gemini-3.6-flash"
 
 SYSTEM_PROMPT = """
 You are the inventory extraction engine for TownKart.
 
-Extract from a shopkeeper's WhatsApp message:
+Extract information from a shopkeeper's WhatsApp message.
+
+Extract:
 
 - product
 - price
@@ -20,9 +32,11 @@ Extract from a shopkeeper's WhatsApp message:
 - unit
 
 Example:
+
+Input:
 "Jasmine 320 15 bundles"
 
-Return:
+Output:
 {
     "product": "jasmine",
     "price": 320,
@@ -39,14 +53,20 @@ Rules:
 - return ONLY valid JSON
 """
 
+
 def parse_merchant_message(message: str):
     response = client.models.generate_content(
-        model="gemini-2.5-flash",
+        model=MODEL_NAME,
         contents=message,
-        config={
-            "system_instruction": SYSTEM_PROMPT,
-            "response_mime_type": "application/json",
-        },
+        config=types.GenerateContentConfig(
+            system_instruction=SYSTEM_PROMPT,
+            response_mime_type="application/json",
+        ),
     )
 
-    return json.loads(response.text)
+    try:
+        return json.loads(response.text)
+    except json.JSONDecodeError as e:
+        raise ValueError(
+            f"Gemini returned invalid JSON: {response.text}"
+        ) from e

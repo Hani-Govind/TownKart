@@ -1,9 +1,23 @@
 import json
-from google import genai
-from google.genai import types
 import os
 
-client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
+from dotenv import load_dotenv
+from google import genai
+from google.genai import types
+
+load_dotenv()
+
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+
+if not GEMINI_API_KEY:
+    raise RuntimeError(
+        "GEMINI_API_KEY is not set. "
+        "Add it to your backend/.env file."
+    )
+
+client = genai.Client(api_key=GEMINI_API_KEY)
+
+MODEL_NAME = "gemini-3.6-flash"
 
 SYSTEM_PROMPT = """
 You are the query understanding engine for TownKart.
@@ -33,14 +47,20 @@ Rules:
 - return ONLY valid JSON
 """
 
+
 def parse_customer_query(query: str):
     response = client.models.generate_content(
-        model="gemini-2.5-flash",
+        model=MODEL_NAME,
         contents=query,
         config=types.GenerateContentConfig(
             system_instruction=SYSTEM_PROMPT,
-            response_mime_type="application/json"
-        )
+            response_mime_type="application/json",
+        ),
     )
 
-    return json.loads(response.text)
+    try:
+        return json.loads(response.text)
+    except json.JSONDecodeError as e:
+        raise ValueError(
+            f"Gemini returned invalid JSON: {response.text}"
+        ) from e
