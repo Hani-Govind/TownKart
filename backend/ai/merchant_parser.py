@@ -1,13 +1,19 @@
 import json
 import os
-from openai import OpenAI
+from dotenv import load_dotenv
+from google import genai
 
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+load_dotenv()
+
+client = genai.Client(
+    api_key=os.getenv("GEMINI_API_KEY")
+)
 
 SYSTEM_PROMPT = """
 You are the inventory extraction engine for TownKart.
 
 Extract from a shopkeeper's WhatsApp message:
+
 - product
 - price
 - quantity
@@ -16,27 +22,31 @@ Extract from a shopkeeper's WhatsApp message:
 Example:
 "Jasmine 320 15 bundles"
 
+Return:
 {
-  "product": "jasmine",
-  "price": 320,
-  "quantity": 15,
-  "unit": "bundle"
+    "product": "jasmine",
+    "price": 320,
+    "quantity": 15,
+    "unit": "bundle"
 }
 
 Rules:
+
 - do not invent missing values
 - price must be a number or null
 - quantity must be a number or null
+- unit must be a string or null
 - return ONLY valid JSON
 """
 
 def parse_merchant_message(message: str):
-    response = client.chat.completions.create(
-        model="gpt-4.1-mini",
-        response_format={"type": "json_object"},
-        messages=[
-            {"role": "system", "content": SYSTEM_PROMPT},
-            {"role": "user", "content": message},
-        ],
+    response = client.models.generate_content(
+        model="gemini-2.5-flash",
+        contents=message,
+        config={
+            "system_instruction": SYSTEM_PROMPT,
+            "response_mime_type": "application/json",
+        },
     )
-    return json.loads(response.choices[0].message.content)
+
+    return json.loads(response.text)
