@@ -1,0 +1,5 @@
+.env
+__pycache__/
+*.pyc
+*.pkl
+townkart-f5344-firebase-adminsdk-fbsvc-866e1045b4.json
