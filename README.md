@@ -72,10 +72,9 @@ TownKart uses a combination of artificial intelligence, machine learning, backen
 
 ## 🎥 Demo
 
-## 🎥 Demo
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/Hani-Govind/TownKart/main/assets/demo.gif" alt="TownKart Demo" width="850">
+  <img src="https://raw.githubusercontent.com/Hani-Govind/TownKart/main/assets/demo.gif" alt="TownKart Demo" width="500">
 </p>
 ---
 ##  System Architecture
