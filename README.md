@@ -70,11 +70,11 @@ TownKart uses a combination of artificial intelligence, machine learning, backen
 | Uvicorn | ASGI server used to run the FastAPI backend |
 ## Demo
 
-<p align="center">
-  <img src="./assets/demo.gif" alt="TownKart Demo" width="850">
-</p>
+## 🎥 Demo
 
-![TownKart Demo](assets/demo.gif)
+<p align="center">
+  <img src="assets/demo.gif" alt="TownKart Demo" width="850">
+</p>
 ---
 
 ##  System Architecture
